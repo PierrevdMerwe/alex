@@ -1,0 +1,1579 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Operation Laaste Braai</title>
+<meta name="description" content="A bachelors invitation disguised as someone else's phone.">
+<meta property="og:title" content="Operation Laaste Braai">
+<meta property="og:description" content="You have been selected. Open the group chat.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&display=swap">
+<style>
+/* ============================================================
+   OPERATION LAASTE BRAAI — a bachelors invite in a phone
+   Single file. Drop into a repo, enable GitHub Pages, done.
+   All the text you'd want to change lives in the CONFIG block
+   at the top of the <script> tag near the bottom.
+   ============================================================ */
+
+:root{
+  --ink:#0A070D;
+  --room:#160E18;
+  --ember:#FF6B2C;
+  --amber:#FFC46B;
+  --plum:#3A1E3C;
+  --imsg:#0A84FF;
+  --imsg-2:#0068D6;
+  --bub:#262629;
+  --bub-2:#1B1B1E;
+  --sheet:#0C0C0D;
+  --sheet-2:#141416;
+  --txt:#F6F4F1;
+  --dim:#8E8A93;
+  --dim-2:#605D66;
+  --hair:rgba(255,255,255,.09);
+  --hair-2:rgba(255,255,255,.055);
+  --ui:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --mono:"Space Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  margin:0;
+  background:var(--ink);
+  color:var(--txt);
+  font-family:var(--ui);
+  overflow:hidden;
+  overscroll-behavior:none;
+}
+
+/* ---------- the room the phone sits in ---------- */
+.room{
+  position:fixed;inset:0;
+  display:grid;place-items:center;
+  background:
+    radial-gradient(120% 80% at 50% 112%, rgba(255,107,44,.30) 0%, rgba(255,107,44,0) 58%),
+    radial-gradient(90% 60% at 50% -6%, rgba(58,30,60,.85) 0%, rgba(58,30,60,0) 60%),
+    var(--ink);
+}
+.room::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  opacity:.045;mix-blend-mode:overlay;
+}
+.hint{
+  position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+  font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--dim-2);opacity:0;transition:opacity .6s ease;pointer-events:none;white-space:nowrap;
+}
+.hint.show{opacity:1}
+
+/* ---------- device ---------- */
+.device{
+  position:relative;width:390px;height:844px;flex:none;
+  transform:scale(var(--s,1));transform-origin:center center;
+  border-radius:56px;
+  padding:11px;
+  background:linear-gradient(145deg,#5B5560 0%,#232128 22%,#3E3A45 50%,#1A181E 78%,#4A4550 100%);
+  box-shadow:
+    0 0 0 1px rgba(0,0,0,.6),
+    0 40px 80px -20px rgba(0,0,0,.85),
+    0 0 120px -10px rgba(255,107,44,.22);
+}
+.device::before{ /* side buttons */
+  content:"";position:absolute;left:-2px;top:150px;width:3px;height:62px;
+  border-radius:2px;background:linear-gradient(180deg,#4A4550,#222026);
+  box-shadow:0 78px 0 #33303a, 0 0 0 0 transparent;
+}
+.device::after{
+  content:"";position:absolute;right:-2px;top:196px;width:3px;height:96px;
+  border-radius:2px;background:linear-gradient(180deg,#4A4550,#222026);
+}
+.screen{
+  position:relative;width:100%;height:100%;
+  border-radius:46px;overflow:hidden;
+  background:var(--ink);
+  isolation:isolate;
+}
+body.bare .device{padding:0;border-radius:0;box-shadow:none;background:none}
+body.bare .device::before,body.bare .device::after{display:none}
+body.bare .screen{border-radius:0}
+
+/* ---------- wallpaper: veld sunset ---------- */
+.wall{
+  position:absolute;inset:0;z-index:0;
+  background:
+    radial-gradient(58% 30% at 50% 74%, rgba(255,196,107,.55) 0%, rgba(255,196,107,0) 70%),
+    radial-gradient(90% 44% at 50% 80%, rgba(255,107,44,.62) 0%, rgba(255,107,44,0) 72%),
+    linear-gradient(180deg,#120B18 0%,#241132 34%,#5A2338 58%,#A83D2B 74%,#E9702B 84%,#2A1420 88%,#150C16 100%);
+}
+.wall .moon{
+  position:absolute;left:74%;top:13%;width:34px;height:34px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#FFF6E6,#FFD9A0);
+  box-shadow:0 0 34px 8px rgba(255,217,160,.28);
+}
+.wall .hill{position:absolute;left:-10%;right:-10%;bottom:0;height:30%}
+.wall .hill i{
+  position:absolute;bottom:0;display:block;border-radius:50% 50% 0 0 / 100% 100% 0 0;
+}
+.wall .h1{left:-14%;width:84%;height:30%;background:#24121F;opacity:.92}
+.wall .h2{right:-18%;width:88%;height:22%;background:#180C17}
+.wall .h3{left:24%;width:62%;height:13%;background:#0D0710}
+
+/* ---------- status bar ---------- */
+.status{
+  position:absolute;top:0;left:0;right:0;height:54px;z-index:40;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 30px 0;font-size:15px;font-weight:600;letter-spacing:.2px;
+  pointer-events:none;color:#fff;
+}
+.status .right{display:flex;align-items:center;gap:5px}
+.status svg{display:block}
+.island{
+  position:absolute;top:11px;left:50%;transform:translateX(-50%);
+  width:124px;height:36px;border-radius:20px;background:#000;z-index:45;pointer-events:none;
+}
+.island::after{
+  content:"";position:absolute;right:11px;top:11px;width:9px;height:9px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#1E2A3A,#05070B);
+  box-shadow:inset 0 0 2px rgba(90,140,200,.55);
+}
+.bar{
+  position:absolute;bottom:7px;left:50%;transform:translateX(-50%);
+  width:138px;height:5px;border-radius:3px;background:rgba(255,255,255,.92);z-index:46;pointer-events:none;
+}
+
+/* ---------- view stack ---------- */
+.view{position:absolute;inset:0;z-index:10;visibility:hidden;opacity:0}
+.view.on{visibility:visible;opacity:1}
+.view.sheet{background:var(--sheet)}   /* open/close is driven from JS */
+
+/* ---------- home screen ---------- */
+#home{z-index:5;visibility:visible;opacity:1}
+.grid{
+  position:absolute;top:78px;left:0;right:0;bottom:118px;z-index:20;
+  display:grid;grid-template-columns:repeat(4,1fr);
+  grid-auto-rows:min-content;gap:22px 0;padding:0 20px;align-content:start;
+}
+.app{
+  display:flex;flex-direction:column;align-items:center;gap:7px;
+  border:0;background:none;padding:0;cursor:pointer;
+  font-family:var(--ui);animation:appIn .5s cubic-bezier(.2,1.2,.4,1) both;
+}
+.app:focus-visible{outline:2px solid #fff;outline-offset:4px;border-radius:18px}
+.app .ic{
+  position:relative;width:60px;height:60px;border-radius:14.5px;
+  display:grid;place-items:center;overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.18);
+  transition:transform .16s cubic-bezier(.3,1.4,.5,1);
+}
+.app:active .ic{transform:scale(.86)}
+.app .lb{
+  font-size:11.5px;font-weight:450;letter-spacing:.1px;color:#fff;
+  text-shadow:0 1px 3px rgba(0,0,0,.65);max-width:74px;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;
+}
+@keyframes appIn{
+  from{opacity:0;transform:scale(.5) translateY(14px)}
+  to{opacity:1;transform:none}
+}
+/* wiggle when you poke a locked app */
+.app.nope{animation:wiggle .45s ease}
+@keyframes wiggle{
+  0%,100%{transform:rotate(0)}
+  15%{transform:rotate(-3.5deg)}
+  38%{transform:rotate(3deg)}
+  60%{transform:rotate(-2deg)}
+  82%{transform:rotate(1.2deg)}
+}
+.badge{
+  position:absolute;top:-5px;right:-5px;min-width:22px;height:22px;padding:0 6px;
+  border-radius:11px;background:#FF3B30;color:#fff;font-size:13px;font-weight:600;
+  display:grid;place-items:center;box-shadow:0 0 0 2px rgba(0,0,0,.22);
+  z-index:3;font-variant-numeric:tabular-nums;
+}
+.badge.pop{animation:badgePop .55s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes badgePop{
+  0%{transform:scale(0)}
+  55%{transform:scale(1.28)}
+  100%{transform:scale(1)}
+}
+.badge.throb{animation:throb 2.4s ease-in-out infinite}
+@keyframes throb{0%,88%,100%{transform:scale(1)}92%{transform:scale(1.16)}96%{transform:scale(.96)}}
+
+.dock{
+  position:absolute;left:12px;right:12px;bottom:26px;height:92px;z-index:20;
+  border-radius:32px;background:rgba(255,255,255,.14);
+  backdrop-filter:blur(26px) saturate(1.5);-webkit-backdrop-filter:blur(26px) saturate(1.5);
+  box-shadow:inset 0 0 0 .5px rgba(255,255,255,.16);
+  display:grid;grid-template-columns:repeat(4,1fr);align-items:center;justify-items:center;
+  animation:dockIn .6s .18s cubic-bezier(.2,1.1,.4,1) both;
+}
+@keyframes dockIn{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:none}}
+.dock .app .lb{display:none}
+.pagedots{
+  position:absolute;left:0;right:0;bottom:126px;z-index:20;display:flex;gap:7px;justify-content:center;
+}
+.pagedots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.35)}
+.pagedots i.on{background:#fff}
+
+/* icon art */
+.ic svg{width:60px;height:60px;display:block}
+.ic .glyph{position:absolute;inset:0;display:grid;place-items:center}
+
+/* ---------- notification banner ---------- */
+.notif{
+  position:absolute;top:62px;left:10px;right:10px;z-index:60;
+  border-radius:24px;padding:12px 14px;display:flex;gap:11px;align-items:flex-start;
+  background:rgba(38,34,40,.72);
+  backdrop-filter:blur(30px) saturate(1.7);-webkit-backdrop-filter:blur(30px) saturate(1.7);
+  box-shadow:0 12px 34px rgba(0,0,0,.55), inset 0 0 0 .5px rgba(255,255,255,.13);
+  color:#fff;cursor:pointer;text-align:left;border:0;font-family:var(--ui);
+  transform:translateY(-190%);opacity:0;pointer-events:none;
+}
+.notif.in{
+  animation:notifIn .72s cubic-bezier(.16,1.5,.35,1) forwards;pointer-events:auto;
+}
+.notif.out{animation:notifOut .38s cubic-bezier(.5,0,.75,0) forwards;pointer-events:none}
+@keyframes notifIn{
+  0%{transform:translateY(-190%) scale(.9);opacity:0}
+  55%{opacity:1}
+  70%{transform:translateY(7px) scale(1.02)}
+  85%{transform:translateY(-3px) scale(.995)}
+  100%{transform:translateY(0) scale(1);opacity:1}
+}
+@keyframes notifOut{to{transform:translateY(-190%) scale(.92);opacity:0}}
+.notif .nic{width:40px;height:40px;border-radius:10px;flex:none;overflow:hidden;position:relative}
+.notif .ntx{flex:1;min-width:0}
+.notif .ntop{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.notif .ntitle{font-size:14px;font-weight:600;letter-spacing:.1px}
+.notif .ntime{font-size:12px;color:rgba(255,255,255,.62);flex:none}
+.notif .nbody{font-size:14px;line-height:1.28;color:rgba(255,255,255,.92);margin-top:1px}
+.notif .nbody b{font-weight:600}
+.notif .nkicker{
+  font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;
+  color:rgba(255,255,255,.5);margin-bottom:2px;
+}
+.notif:active{transform:scale(.975)}
+
+/* ---------- lock screen ---------- */
+.lock{
+  z-index:35;display:flex;flex-direction:column;align-items:center;background:var(--ink);
+}
+.lock .wall{filter:brightness(.6) saturate(.92)}
+.lock .wall .moon{top:27%;left:79%;width:28px;height:28px}
+.lock .veil{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(6,3,8,.42) 0%,rgba(6,3,8,.30) 34%,rgba(6,3,8,.68) 100%)}
+.lockTop{position:relative;z-index:2;text-align:center;padding-top:62px}
+.lockTop .padlock{opacity:.92;margin-bottom:9px}
+.lockTime{
+  font-size:74px;font-weight:250;letter-spacing:-2.5px;line-height:1;color:#fff;
+  font-variant-numeric:tabular-nums;text-shadow:0 2px 22px rgba(0,0,0,.35);
+}
+.lockDate{font-size:15px;font-weight:500;margin-top:5px;color:rgba(255,255,255,.82);letter-spacing:.1px}
+.pinPad{
+  position:relative;z-index:2;margin-top:auto;padding-bottom:24px;
+  display:flex;flex-direction:column;align-items:center;
+}
+.pinTitle{font-size:15px;font-weight:500;color:rgba(255,255,255,.94);letter-spacing:.1px}
+.dots{display:flex;gap:21px;margin:17px 0 0}
+.dots i{
+  width:13px;height:13px;border-radius:50%;border:1.3px solid rgba(255,255,255,.8);
+  transition:background .12s ease, transform .12s ease;
+}
+.dots i.on{background:#fff;transform:scale(1.06)}
+.dots.wrong{animation:shake .5s cubic-bezier(.36,.07,.19,.97)}
+@keyframes shake{
+  10%,90%{transform:translateX(-6px)} 20%,80%{transform:translateX(7px)}
+  30%,50%,70%{transform:translateX(-10px)} 40%,60%{transform:translateX(10px)}
+}
+.pinHint{
+  min-height:34px;font-size:12.5px;line-height:1.35;color:rgba(255,255,255,.68);
+  text-align:center;padding:9px 26px 0;max-width:310px;opacity:0;transition:opacity .45s ease;
+}
+.pinHint.show{opacity:1}
+.pinHint b{font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--amber);display:block;margin-bottom:3px;font-weight:700}
+.keys{display:grid;grid-template-columns:repeat(3,74px);gap:15px 25px}
+.key{
+  width:74px;height:74px;border-radius:50%;border:0;cursor:pointer;color:#fff;
+  background:rgba(255,255,255,.17);
+  backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);
+  font-family:var(--ui);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  transition:background .12s ease, transform .1s cubic-bezier(.3,1.4,.5,1);
+}
+.key:active{background:rgba(255,255,255,.44);transform:scale(.93)}
+.key:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.key b{font-size:31px;font-weight:400;line-height:1;letter-spacing:.5px}
+.key em{font-size:9.5px;font-weight:600;letter-spacing:1.7px;font-style:normal;opacity:.9}
+.key.ghost{background:none;pointer-events:none;visibility:hidden}
+.key.del{background:none;font-size:15.5px;font-weight:400}
+.key.del:active{background:rgba(255,255,255,.15)}
+.lock.open{animation:unlock .64s cubic-bezier(.5,0,.28,1) forwards}
+@keyframes unlock{
+  to{opacity:0;transform:translateY(-16%) scale(1.14);filter:blur(7px)}
+}
+body.locked #clock{opacity:0}
+
+/* ---------- generic app chrome ---------- */
+.nav{
+  position:relative;z-index:5;padding:56px 16px 8px;
+  background:rgba(18,18,20,.86);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  border-bottom:.5px solid var(--hair-2);
+}
+.nav .row{display:flex;align-items:center;gap:4px;min-height:34px}
+.back{
+  display:flex;align-items:center;gap:1px;border:0;background:none;color:var(--imsg);
+  font-family:var(--ui);font-size:17px;cursor:pointer;padding:2px 6px 2px 0;margin-left:-4px;
+}
+.back:active{opacity:.5}
+.back .cnt{
+  min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--imsg);color:#fff;
+  font-size:12px;font-weight:600;display:grid;place-items:center;margin-left:2px;
+}
+.h1{font-size:32px;font-weight:700;letter-spacing:-.6px;margin:2px 0 10px}
+.search{
+  display:flex;align-items:center;gap:7px;height:36px;border-radius:10px;
+  background:rgba(255,255,255,.08);padding:0 10px;color:var(--dim);font-size:16px;margin-bottom:8px;
+}
+.scroll{position:absolute;top:0;bottom:0;left:0;right:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.scroll::-webkit-scrollbar{width:0}
+
+/* ---------- messages list ---------- */
+#msgs .list{padding:0 0 40px}
+.chat-row{
+  display:flex;gap:11px;align-items:flex-start;width:100%;
+  padding:10px 14px 10px 10px;border:0;background:none;cursor:pointer;text-align:left;
+  font-family:var(--ui);color:var(--txt);position:relative;
+  animation:rowIn .42s cubic-bezier(.2,1,.3,1) both;
+}
+@keyframes rowIn{from{opacity:0;transform:translateX(22px)}to{opacity:1;transform:none}}
+.chat-row:active{background:rgba(255,255,255,.07)}
+.chat-row+.chat-row::before{
+  content:"";position:absolute;top:0;left:88px;right:0;height:.5px;background:var(--hair-2);
+}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--imsg);flex:none;margin:16px 0 0 -3px;opacity:0}
+.chat-row.unread .dot{opacity:1;animation:badgePop .5s cubic-bezier(.2,1.6,.4,1) both}
+.av{
+  width:50px;height:50px;border-radius:50%;flex:none;display:grid;place-items:center;
+  font-size:19px;font-weight:500;color:#fff;letter-spacing:-.3px;position:relative;overflow:hidden;
+}
+.av.stack{background:none}
+.av.stack span{
+  position:absolute;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:600;
+  box-shadow:0 0 0 1.5px var(--sheet);
+}
+.av.stack span:nth-child(1){width:32px;height:32px;left:0;bottom:0}
+.av.stack span:nth-child(2){width:28px;height:28px;right:0;bottom:2px}
+.av.stack span:nth-child(3){width:26px;height:26px;left:11px;top:0}
+.cmeta{flex:1;min-width:0;padding-top:2px}
+.cname{font-size:16.5px;font-weight:600;letter-spacing:-.2px;display:flex;align-items:center;gap:5px}
+.cprev{
+  font-size:14.5px;line-height:1.3;color:var(--dim);margin-top:2px;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.chat-row.unread .cprev{color:#CFCBD4}
+.cright{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none;padding-top:4px}
+.ctime{font-size:13px;color:var(--dim-2);white-space:nowrap}
+.chev{width:8px;height:13px;opacity:.35}
+
+/* ---------- chat thread ---------- */
+#thread{display:flex;flex-direction:column;align-items:stretch;background:#000}
+.thead{
+  position:relative;z-index:6;padding:50px 12px 9px;flex:none;
+  background:rgba(18,18,20,.84);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  border-bottom:.5px solid var(--hair-2);
+  display:grid;grid-template-columns:64px 1fr 64px;align-items:center;
+}
+.thead .who{display:flex;flex-direction:column;align-items:center;gap:3px}
+.thead .who .av{width:34px;height:34px;font-size:14px}
+.thead .who .av.stack{transform:scale(.66);transform-origin:center}
+.thead .who .nm{font-size:12px;font-weight:500;display:flex;align-items:center;gap:3px;color:var(--txt)}
+.facetime{
+  width:34px;height:34px;border-radius:50%;display:grid;place-items:center;justify-self:end;
+  background:rgba(255,255,255,.08);border:0;cursor:pointer;color:var(--imsg);
+}
+.tbody{flex:1;overflow-y:auto;padding:14px 12px 8px;display:flex;flex-direction:column;gap:2px}
+.tbody::-webkit-scrollbar{width:0}
+.daystamp{
+  text-align:center;font-size:11px;color:var(--dim-2);padding:8px 0 12px;
+  font-weight:500;letter-spacing:.2px;
+}
+.daystamp b{color:var(--dim);font-weight:600}
+
+.line{display:flex;gap:7px;align-items:flex-end;margin-top:2px;max-width:100%}
+.line.in{justify-content:flex-start}
+.line.out{justify-content:flex-end}
+.line .sav{
+  width:27px;height:27px;border-radius:50%;flex:none;display:grid;place-items:center;
+  font-size:11px;font-weight:600;color:#fff;margin-bottom:1px;
+}
+.line .sav.ghost{visibility:hidden}
+.col{display:flex;flex-direction:column;min-width:0;max-width:74%}
+.sender{
+  font-size:11px;color:var(--dim);margin:8px 0 3px 12px;font-weight:500;letter-spacing:.1px;
+}
+.bub{
+  position:relative;padding:8px 13px 9px;border-radius:19px;font-size:16px;line-height:1.32;
+  letter-spacing:-.2px;word-wrap:break-word;white-space:pre-wrap;
+  animation:bubIn .44s cubic-bezier(.18,1.3,.35,1) both;
+  transform-origin:var(--to,0% 100%);
+}
+@keyframes bubIn{
+  0%{opacity:0;transform:scale(.4) translateY(12px)}
+  55%{opacity:1}
+  75%{transform:scale(1.035) translateY(0)}
+  100%{opacity:1;transform:scale(1) translateY(0)}
+}
+.in .bub{background:var(--bub);color:var(--txt);border-bottom-left-radius:6px;align-self:flex-start}
+.out .bub{
+  background:linear-gradient(180deg,var(--imsg),var(--imsg-2));color:#fff;
+  border-bottom-right-radius:6px;align-self:flex-end;--to:100% 100%;
+}
+.in .bub+.bub{margin-top:2px;border-bottom-left-radius:6px;border-top-left-radius:6px}
+.out .bub+.bub{margin-top:2px;border-top-right-radius:6px}
+.bub .em{font-size:40px;line-height:1.1;display:block}
+.bub.emoji-only{background:none!important;padding:2px 6px;box-shadow:none}
+.bub.mono{font-family:var(--mono);font-size:13px;line-height:1.55;letter-spacing:0}
+.bub.mono .k{color:var(--amber);font-weight:700}
+
+/* tapback */
+.tap{
+  position:absolute;top:-13px;height:26px;min-width:26px;padding:0 5px;border-radius:13px;
+  background:var(--bub);display:grid;place-items:center;font-size:13px;
+  box-shadow:0 0 0 1.5px #000;animation:tapIn .5s cubic-bezier(.2,1.7,.4,1) both;
+}
+.out .tap{left:-12px}
+.in .tap{right:-12px;background:var(--bub)}
+.tap::before,.tap::after{
+  content:"";position:absolute;border-radius:50%;background:var(--bub);box-shadow:0 0 0 1.5px #000;
+}
+.tap::before{width:9px;height:9px;bottom:-5px}
+.tap::after{width:4px;height:4px;bottom:-11px}
+.out .tap::before{right:3px}.out .tap::after{right:0}
+.in .tap::before{left:3px}.in .tap::after{left:0}
+@keyframes tapIn{0%{opacity:0;transform:scale(0)}60%{opacity:1;transform:scale(1.3)}100%{transform:scale(1)}}
+
+/* a GIF attachment */
+.gifcard{
+  position:relative;width:174px;height:130px;border-radius:17px;overflow:hidden;
+  background:linear-gradient(152deg,#2C2C33 0%,#17171B 100%);
+  display:grid;place-items:center;align-self:flex-start;
+  box-shadow:inset 0 0 0 .5px rgba(255,255,255,.11);
+  animation:bubIn .44s cubic-bezier(.18,1.3,.35,1) both;
+}
+.gifcard .face{font-size:54px;line-height:1;animation:gifBob 1.5s ease-in-out infinite}
+@keyframes gifBob{
+  0%,100%{transform:translateY(2px) rotate(-4deg)}
+  50%{transform:translateY(-7px) rotate(4deg)}
+}
+.gifcard .tag{
+  position:absolute;left:8px;top:8px;padding:2.5px 6px;border-radius:5px;
+  background:rgba(0,0,0,.62);font-family:var(--mono);font-size:8.5px;font-weight:700;
+  letter-spacing:.14em;color:#fff;
+}
+
+/* typing indicator */
+.typing{
+  display:inline-flex;gap:5px;align-items:center;background:var(--bub);
+  padding:12px 14px;border-radius:19px;border-bottom-left-radius:6px;
+  animation:bubIn .34s cubic-bezier(.2,1.3,.4,1) both;
+}
+.typing i{
+  width:8px;height:8px;border-radius:50%;background:#8B8792;display:block;
+  animation:blip 1.25s ease-in-out infinite;
+}
+.typing i:nth-child(2){animation-delay:.17s}
+.typing i:nth-child(3){animation-delay:.34s}
+@keyframes blip{
+  0%,58%,100%{transform:translateY(0) scale(.86);opacity:.42}
+  28%{transform:translateY(-5px) scale(1.1);opacity:1}
+}
+.delivered{
+  align-self:flex-end;font-size:11px;color:var(--dim-2);margin:3px 4px 2px 0;font-weight:500;
+  animation:fadeIn .5s ease both;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ---------- invite card (the payload) ---------- */
+.invite{
+  align-self:flex-start;width:100%;max-width:290px;border-radius:20px;overflow:hidden;
+  background:linear-gradient(168deg,#231025 0%,#3A1424 48%,#7A2C1C 100%);
+  box-shadow:0 14px 34px rgba(0,0,0,.6), inset 0 0 0 .5px rgba(255,196,107,.28);
+  animation:cardIn .7s cubic-bezier(.16,1.2,.3,1) both;position:relative;
+}
+@keyframes cardIn{
+  0%{opacity:0;transform:scale(.8) translateY(24px) rotate(-2deg)}
+  60%{opacity:1}
+  100%{opacity:1;transform:none}
+}
+.invite::after{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(80% 50% at 50% 108%, rgba(255,107,44,.5), transparent 70%);
+}
+.invite .acts{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,196,107,.22);position:relative;z-index:2}
+.invite .acts.one{grid-template-columns:1fr}
+.invite .acts a{
+  padding:12px 6px;text-align:center;font-size:13.5px;font-weight:600;text-decoration:none;
+  color:#FFE9CE;background:rgba(20,8,16,.55);transition:background .18s ease;
+}
+.invite .acts a:hover,.invite .acts a:focus-visible{background:rgba(255,107,44,.34)}
+
+/* ---------- reply chips ---------- */
+.replybar{
+  flex:none;position:relative;z-index:6;padding:9px 10px 11px;
+  background:rgba(16,16,18,.92);
+  backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);
+  border-top:.5px solid var(--hair-2);min-height:64px;
+  display:flex;flex-direction:column;gap:7px;justify-content:center;
+}
+.replybar .cue{
+  font-family:var(--mono);font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--dim-2);padding-left:4px;
+}
+.chips{display:flex;flex-direction:column;gap:7px}
+.chip{
+  border:0;cursor:pointer;font-family:var(--ui);font-size:15px;font-weight:500;letter-spacing:-.15px;
+  padding:11px 15px;border-radius:19px;text-align:left;color:#fff;
+  background:linear-gradient(180deg,#2E2E33,#242428);
+  box-shadow:inset 0 0 0 .5px rgba(255,255,255,.14), 0 2px 8px rgba(0,0,0,.4);
+  animation:chipIn .46s cubic-bezier(.18,1.35,.35,1) both;
+  transition:transform .14s cubic-bezier(.3,1.4,.5,1), background .18s ease;
+  position:relative;overflow:hidden;
+}
+@keyframes chipIn{
+  0%{opacity:0;transform:translateY(20px) scale(.93)}
+  100%{opacity:1;transform:none}
+}
+.chip:hover{background:linear-gradient(180deg,#3A3A41,#2C2C31)}
+.chip:active{transform:scale(.96)}
+.chip:focus-visible{outline:2px solid var(--imsg);outline-offset:2px}
+.chip.primary{background:linear-gradient(180deg,var(--imsg),var(--imsg-2));box-shadow:0 4px 14px rgba(10,132,255,.32)}
+.chip.primary:hover{background:linear-gradient(180deg,#3A9CFF,#0A6FE8)}
+.chip.go{animation:chipGo .34s cubic-bezier(.5,0,.75,0) forwards}
+@keyframes chipGo{to{opacity:0;transform:translateY(-14px) scale(.9)}}
+.chips.clearing .chip{animation:chipOut .26s ease forwards}
+@keyframes chipOut{to{opacity:0;transform:translateY(10px) scale(.95)}}
+
+.fakeinput{
+  display:flex;align-items:center;gap:9px;padding:2px 4px;
+}
+.fakeinput .box{
+  flex:1;height:36px;border-radius:18px;border:.5px solid rgba(255,255,255,.18);
+  display:flex;align-items:center;padding:0 13px;color:var(--dim-2);font-size:16px;
+}
+.fakeinput .mic{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center;flex:none}
+
+/* ---------- toast ---------- */
+.toast{
+  position:absolute;left:16px;right:16px;bottom:44px;z-index:70;
+  padding:13px 17px;border-radius:18px;text-align:center;font-size:14.5px;line-height:1.35;
+  background:rgba(30,28,32,.82);color:#fff;
+  backdrop-filter:blur(26px) saturate(1.6);-webkit-backdrop-filter:blur(26px) saturate(1.6);
+  box-shadow:0 12px 34px rgba(0,0,0,.55), inset 0 0 0 .5px rgba(255,255,255,.13);
+  opacity:0;transform:translateY(22px) scale(.94);pointer-events:none;
+}
+.toast .tk{
+  display:block;font-family:var(--mono);font-size:8.5px;letter-spacing:.25em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:4px;
+}
+.toast.in{animation:toastIn .5s cubic-bezier(.18,1.4,.4,1) forwards}
+.toast.out{animation:toastOut .3s ease forwards}
+@keyframes toastIn{to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(16px) scale(.96)}}
+
+/* ---------- confetti ---------- */
+#confetti{position:absolute;inset:0;z-index:80;pointer-events:none}
+
+/* ---------- responsive ---------- */
+@media (max-width:440px){
+  .hint{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  .bub,.chip,.chat-row,.app,.invite{opacity:1!important;transform:none!important}
+}
+</style>
+</head>
+<body>
+<div class="room">
+  <div class="device" id="device">
+    <div class="screen" id="scr">
+
+      <!-- ============ HOME ============ -->
+      <section class="view on" id="home">
+        <div class="wall">
+          <div class="moon"></div>
+          <div class="hill"><i class="h2"></i><i class="h1"></i><i class="h3"></i></div>
+        </div>
+        <div class="grid" id="grid"></div>
+        <div class="pagedots"><i class="on"></i><i></i><i></i></div>
+        <div class="dock" id="dock"></div>
+      </section>
+
+      <!-- ============ MESSAGES LIST ============ -->
+      <section class="view sheet" id="msgs">
+        <div class="scroll">
+          <div class="nav">
+            <div class="row">
+              <button class="back" id="msgsBack" aria-label="Back to home screen">
+                <svg width="12" height="20" viewBox="0 0 12 20" fill="none" aria-hidden="true"><path d="M10 1 2 10l8 9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <span style="flex:1"></span>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" style="color:var(--imsg)" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+            </div>
+            <h1 class="h1">Messages</h1>
+            <div class="search">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.4"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+              Search
+            </div>
+          </div>
+          <div class="list" id="chatList"></div>
+        </div>
+      </section>
+
+      <!-- ============ THREAD ============ -->
+      <section class="view sheet" id="thread">
+        <header class="thead">
+          <button class="back" id="threadBack" aria-label="Back to messages">
+            <svg width="12" height="20" viewBox="0 0 12 20" fill="none" aria-hidden="true"><path d="M10 1 2 10l8 9" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span class="cnt" id="backCount">7</span>
+          </button>
+          <div class="who" id="threadWho"></div>
+          <button class="facetime" aria-label="Video call">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="2" y="6" width="13" height="12" rx="3" stroke="currentColor" stroke-width="1.9"/><path d="m15 11 6-3.5v9L15 13v-2z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/></svg>
+          </button>
+        </header>
+        <div class="tbody" id="tbody"></div>
+        <div class="replybar" id="replybar"></div>
+      </section>
+
+      <!-- ============ LOCK SCREEN ============ -->
+      <section class="view lock on" id="lock">
+        <div class="wall">
+          <div class="moon"></div>
+          <div class="hill"><i class="h2"></i><i class="h1"></i><i class="h3"></i></div>
+        </div>
+        <div class="veil"></div>
+        <div class="lockTop">
+          <svg class="padlock" width="17" height="22" viewBox="0 0 17 22" fill="none" aria-hidden="true">
+            <rect x="1" y="8.5" width="15" height="12.5" rx="3.4" fill="#fff"/>
+            <path d="M4.4 8.5V5.6a4.1 4.1 0 0 1 8.2 0v2.9" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/>
+          </svg>
+          <div class="lockTime" id="lockTime">16:04</div>
+          <div class="lockDate" id="lockDate">Friday, 11 September</div>
+        </div>
+        <div class="pinPad">
+          <div class="pinTitle" id="pinTitle">Enter Passcode</div>
+          <div class="dots" id="dots"><i></i><i></i><i></i><i></i></div>
+          <p class="pinHint" id="pinHint"></p>
+          <div class="keys" id="keys"></div>
+        </div>
+      </section>
+
+      <!-- ============ overlays ============ -->
+      <button class="notif" id="notif" type="button">
+        <span class="nic" id="notifIcon"></span>
+        <span class="ntx">
+          <span class="ntop"><span class="ntitle" id="notifTitle">Messages</span><span class="ntime">now</span></span>
+          <span class="nbody" id="notifBody"></span>
+        </span>
+      </button>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+      <canvas id="confetti"></canvas>
+
+      <div class="status">
+        <span id="clock">14:00</span>
+        <span class="right">
+          <svg width="18" height="12" viewBox="0 0 18 12" fill="currentColor" aria-hidden="true"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="4.6" y="5.6" width="3" height="6.4" rx="1"/><rect x="9.2" y="3" width="3" height="9" rx="1"/><rect x="13.8" y="0" width="3" height="12" rx="1" opacity=".4"/></svg>
+          <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor" aria-hidden="true"><path d="M8 10.6 6.1 8.7a2.7 2.7 0 0 1 3.8 0L8 10.6Zm0-4.3a5.4 5.4 0 0 0-3.8 1.6L2.9 6.6a7.2 7.2 0 0 1 10.2 0l-1.3 1.3A5.4 5.4 0 0 0 8 6.3Zm0-3.6c-2.6 0-5 1-6.8 2.7L0 4.1A11.5 11.5 0 0 1 8 .9c3 0 5.8 1.2 8 3.2l-1.2 1.3A9.6 9.6 0 0 0 8 2.7Z"/></svg>
+          <svg width="26" height="13" viewBox="0 0 26 13" fill="none" aria-hidden="true"><rect x=".6" y=".6" width="21" height="11.8" rx="3.4" stroke="currentColor" stroke-opacity=".4" stroke-width="1.1"/><rect x="2.2" y="2.2" width="15" height="8.6" rx="2.2" fill="currentColor"/><path d="M23.4 4.3v4.4c1-.4 1.6-1.1 1.6-2.2s-.6-1.8-1.6-2.2Z" fill="currentColor" fill-opacity=".45"/></svg>
+        </span>
+      </div>
+      <div class="island"></div>
+      <div class="bar"></div>
+
+    </div>
+  </div>
+  <p class="hint" id="hint">Tik die kennisgewing</p>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   ①  EDIT EVERYTHING HERE
+   ══════════════════════════════════════════════════════════════════ */
+const CONFIG = {
+  groom:     "Alex",
+  bride:     "Helene",
+  bestMan:   "Pierre",
+  group:     "Sambuka Boeta",        // the group chat name
+  operation: "LAASTE BRAAI",         // the title on the invite card
+  dateISO:   "2026-10-02T17:00:00",  // drives the countdown + calendar link
+  dateLong:  "Vrydag 2 – Sondag 4 Oktober",
+  calMonth:  "Oktober",
+  calDay:    "2",
+  depart:    "Vrydag ná werk (of Saterdag vroegoggend)",
+  place:     "Geklassifiseer",
+  placeFull: "Geklassifiseer. Pin kom Vrydagoggend.",
+  weather:   "28°, geen wind, geen verskonings",
+
+  // The phone is locked. 1912 = 19/12, the wedding day.
+  // Want the full date instead? Use "191226" — the dots follow the length automatically.
+  passcode:     "1912",
+  passcodeHint: "Die datum waarna julle altwee aftel.",
+};
+
+/* The cast. `c` is the avatar colour, `i` the initials.
+   Each one has a running gag:
+     Pierre  — runs it like a military operation
+     Beukes  — chaos, nearly leaks the location every time
+     William — deadpan, fact-checks everybody
+     Thomas  — permanently one message behind, never prepared
+     Jean    — communicates exclusively in thumbs                       */
+const CAST = {
+  pierre:  { name: CONFIG.bestMan, i:"P", c:"#E0553C" },
+  beukes:  { name:"Beukes",        i:"B", c:"#2F8F5B" },
+  william: { name:"William",       i:"W", c:"#5B6BD6" },
+  thomas:  { name:"Thomas",        i:"T", c:"#B8823C" },
+  jean:    { name:"Jean",          i:"J", c:"#8A4A8F" },
+};
+
+/* ══════════════════════════════════════════════════════════════════
+   ②  DIE GROEP — a branching tree.
+       Each node: msgs[] then either `choices` or `next`.
+       msg = [who, text, opts?]   opts: {t:typingMs, d:delayAfter, mono, big, tap}
+   ══════════════════════════════════════════════════════════════════ */
+const G = CONFIG.groom, B = CONFIG.bride, M = CONFIG.bestMan;
+
+const TREE = {
+  start:{
+    msgs:[
+      ["pierre","Manne manne manne luister gou.",{t:800,d:420}],
+      ["beukes","😈😈😈",{t:280,d:320,big:true}],
+      ["pierre","@"+G+" - Dis sulke tyd.",{t:900,d:480}],
+      ["william","Dis nie 'n vraag nie btw",{t:1000,d:300}],
+      ["william","Dis 'n kennisgewing",{t:600,d:500}],
+      ["jean","👍",{t:900,d:420,big:true}],
+      ["thomas","Wag, wat gebeur.",{t:1000,d:350}],
+      ["beukes","Scroll op.",{t:450,d:350}],
+      ["thomas","Ek sal nounou, oppad werk toe.",{t:1100,d:700}],
+    ],
+    cue:"Antwoord",
+    choices:[
+      ["Gekies vir wat presies?","what"],
+      ["Ek is bang.","scared"],
+      ["Ek gee nie om nie. Ek's in. 🫡","allin"],
+    ]
+  },
+  what:{
+    msgs:[
+      ["pierre","'n Naweek weg met jou groomsmen 😏",{t:900,d:450}],
+      ["pierre","Een van jou laaste naweke saam met die manne as 'n vrygesel.",{t:1200,d:500}],
+      ["beukes","Ons beplan dit al vandat julle verloof is",{t:1300,d:400}],
+      ["william","Beukes het 'n spreadsheet gemaak",{t:900,d:350}],
+      ["william","Vier tabs. Een heet \"contingencies\"",{t:1300,d:450}],
+      ["beukes","Tab 4 is nie vir jou oë nie",{t:800,d:400}],
+      ["thomas","Daar's 'n spreadsheet?",{t:900,d:350}],
+      ["jean","👍",{t:600,d:700,big:true}],
+    ],
+    next:"when"
+  },
+  scared:{
+    msgs:[
+      ["beukes","Goed so. Korrekte reaksie.",{t:700,d:400}],
+      ["pierre","Negatief. Vrees is nie op die program nie.",{t:1000,d:500}],
+      ["william","Daar is 'n regte program. Gelamineer.",{t:1200,d:400}],
+      ["beukes","GELAMINEER 💪",{t:500,d:400}],
+      ["thomas","Gelamineer?",{t:800,d:350}],
+      ["jean","👍",{t:600,d:700,big:true}],
+    ],
+    next:"when"
+  },
+  allin:{
+    msgs:[
+      ["beukes","YAHOOOO 🔥🔥🔥",{t:500,d:400,tap:"❤️"}],
+      ["pierre","Genoteer. Geen verdere vrae word aanvaar nie.",{t:1100,d:450}],
+      ["william","Hy het ja gesê voor hy een detail gehoor het",{t:1300,d:350}],
+      ["william","Dis presies hoekom ons bekommerd is oor hom",{t:1000,d:450}],
+      ["jean","👍",{t:600,d:700,big:true}],
+    ],
+    next:"when"
+  },
+
+  when:{
+    msgs:[
+      ["pierre","DATUM BEVESTIG\n"+CONFIG.dateLong,{t:900,d:450,mono:true}],
+      ["pierre","Vertrek Vrydag ná werk.",{t:800,d:350}],
+      ["beukes","Of Saterdag vroegoggend",{t:600,d:350}],
+      ["pierre","Dit is nog onder bespreking.",{t:800,d:400}],
+      ["william","Dit is al twee weke onder bespreking",{t:1100,d:400}],
+      ["beukes","Vat die Vrydag af, ons weet jy het verlof",{t:1200,d:350}],
+      ["william","23 dae. Ek het gekyk.",{t:700,d:400}],
+      ["thomas","Watter Vrydag",{t:700,d:350}],
+      ["william","Die 2de, Thomas",{t:600,d:300}],
+      ["thomas","Ok",{t:700,d:700}],
+    ],
+    cue:"Antwoord",
+    choices:[
+      ["Waarheen gaan ons?","where"],
+      ["Wie gaan nog saam?","who"],
+      ["Weet "+B+" hiervan?","bride"],
+    ]
+  },
+  where:{
+    msgs:[
+      ["pierre","RV PUNT: GEKLASSIFISEER.",{t:800,d:450}],
+      ["beukes","Dis—",{t:400,d:250}],
+      ["pierre","BEUKES.",{t:300,d:350}],
+      ["beukes","Jammer",{t:500,d:300}],
+      ["beukes","Dis niks. Vergeet daarvan. 🤐",{t:700,d:450}],
+      ["william","Hy gaan crack voor Vrydag",{t:1000,d:350}],
+      ["william","Ek gee hom nege dae",{t:700,d:450}],
+      ["pierre","Pin kom Vrydagoggend. Nie vroeër nie.",{t:1000,d:400}],
+      ["thomas","So waarheen gaan ons",{t:900,d:350}],
+      ["william","Pragtig",{t:600,d:700}],
+    ],
+    next:"kit"
+  },
+  who:{
+    msgs:[
+      ["pierre","Bevestig: ek, William, Beukes, Thomas, Jean.",{t:1200,d:450}],
+      ["beukes","En jy natuurlik",{t:700,d:350}],
+      ["william","Hy moet maar kom, dis sy naweek",{t:1000,d:400}],
+      ["jean","👍",{t:600,d:350,big:true}],
+      ["pierre","Ses. Finaal.",{t:600,d:400,tap:"👍"}],
+      ["thomas","Is ek bevestig?",{t:900,d:350}],
+      ["william","Jy is letterlik in die lys Thomas",{t:1100,d:700}],
+    ],
+    next:"kit"
+  },
+  bride:{
+    msgs:[
+      ["pierre","Bevestigend. "+B+" is volledig ingelig.",{t:1100,d:450}],
+      ["william","Sy het alles goedgekeur behalwe een ding",{t:1200,d:450}],
+      ["william","Die ding was nooit gaan deurkom nie",{t:1100,d:400}],
+      ["pierre","Die ding is van die program geskrap.",{t:1000,d:400}],
+      ["beukes","Die ding is in my bakkie",{t:700,d:300}],
+      ["pierre","BEUKES.",{t:300,d:400}],
+      ["jean","👍",{t:600,d:700,big:true}],
+    ],
+    next:"kit"
+  },
+
+  kit:{
+    msgs:[
+      ["pierre","PAKLYS\n· Plat toe skoene, hoef nie netjies te wees nie\n· Plakkies\n· Swembroek\n· Sonskerm, anders moer jou verloofde vir jou en vir ons",{t:1600,d:500,mono:true}],
+      ["beukes","En jou dansskoene 💃",{t:700,d:350}],
+      ["william","Niemand dans nie",{t:600,d:350}],
+      ["beukes","Iemand dans altyd",{t:700,d:400}],
+      ["thomas","Het ek 'n swembroek nodig",{t:900,d:300}],
+      ["william","Lees die lys",{t:500,d:700}],
+    ],
+    cue:"Antwoord",
+    choices:[
+      ["Kan ek die program sien?","itin"],
+      ["Kan ek "+B+" saambring?","nobride"],
+      ["Stuur net vir my die details.","invite"],
+    ]
+  },
+  itin:{
+    msgs:[
+      ["pierre","Negatief. Need-to-know.",{t:900,d:450}],
+      ["william","Hy is die hele rede vir die naweek",{t:1100,d:400}],
+      ["william","En hy is nie op die lys nie",{t:900,d:450}],
+      ["beukes","Ek het dit gesien 😎",{t:600,d:350}],
+      ["pierre","Jy het dit geskryf, Beukes.",{t:700,d:350}],
+      ["beukes","En dit wys",{t:600,d:400}],
+      ["thomas","Kan ek dit sien",{t:800,d:300}],
+      ["pierre","Nee.",{t:300,d:350}],
+      ["jean","👍",{t:600,d:700,big:true}],
+    ],
+    next:"invite"
+  },
+  nobride:{
+    msgs:[
+      ["william","Julle is nog nie getroud nie",{t:900,d:400}],
+      ["beukes","DIT IS DIE HELE PUNT VAN DIE NAWEEK",{t:900,d:400}],
+      ["pierre","Versoek geweier, met respek.",{t:800,d:400}],
+      ["thomas","Kan ek my girlfriend saambring",{t:900,d:300}],
+      ["pierre","Nee.",{t:300,d:350}],
+      ["jean","👍",{t:600,d:700,big:true}],
+    ],
+    next:"invite"
+  },
+
+  invite:{
+    msgs:[
+      ["pierre","Dis al wat jy nodig het.",{t:900,d:450}],
+      ["pierre","Bevestig bywoning.",{t:700,d:600}],
+    ],
+    cue:"Nog een ding",
+    choices:[
+      ["Ek's in. 🍻","accept",true],
+      ["Het ek 'n keuse?","nochoice"],
+    ]
+  },
+  nochoice:{
+    msgs:[
+      ["pierre","Nee.",{t:500,d:400}],
+      ["william","Nee",{t:400,d:350}],
+      ["beukes","Nee ❤️",{t:400,d:350}],
+      ["thomas","Nee",{t:600,d:300}],
+      ["jean","👍",{t:600,d:700,big:true}],
+    ],
+    cue:"Antwoord",
+    choices:[["Goed dan. Ek's in. 🍻","accept",true]]
+  },
+  accept:{
+    confetti:true,
+    msgs:[
+      ["beukes","🔥🔥🔥🔥🔥",{t:300,d:350,big:true}],
+      ["pierre","Roger. Vrydag die 2de.",{t:900,d:450}],
+      ["william","Kry bietjie slaap voor die tyd",{t:900,d:350}],
+      ["william","Jy gaan nie daarna slaap nie",{t:700,d:400}],
+      ["thomas","🔥",{t:600,d:350,big:true}],
+      ["jean","👍",{t:600,d:450,big:true}],
+      ["pierre","__RSVP__",{t:600,d:700}],
+      ["pierre","O ja, en hou Saterdag 31 Oktober ook oop.",{t:1400,d:600}],
+      ["pierre","Ok lekker braai!",{t:800,d:400}],
+    ],
+    end:true
+  }
+};
+
+/* ══════════════════════════════════════════════════════════════════
+   ③  DIE INBOX — the group at the top, then his other threads
+   ══════════════════════════════════════════════════════════════════ */
+const CHATS = [
+  {
+    id:"group", group:true, name:CONFIG.group, time:"now", unread:9,
+    prev:M+": Manne manne manne luister gou.",
+    members:[CAST.pierre,CAST.beukes,CAST.william,CAST.thomas,CAST.jean],
+    live:true
+  },
+  {
+    id:"helene", name:B+" 💍❤️", i:"H", c:"#C2557E", time:"11:52",
+    prev:"Gaan geniet dit my buddy ❤️",
+    day:"Today",
+    msgs:[
+      {t:"Gaan geniet dit my buddy ❤️"},
+      {t:"Dankie my kerrie 🥹", me:true},
+    ]
+  },
+  {
+    id:"thomas", name:"Thomas", i:"T", c:"#B8823C", time:"10:07",
+    prev:"Ek het houd vergeet, kry gou oppad na my toe…",
+    day:"Today",
+    msgs:[
+      {t:"Ek het houd vergeet, kry gou oppad na my toe. En sommer n tjoef ook, myne het nounet gekak."},
+      {t:"Nee.", me:true},
+      {gif:"🥺"},
+    ]
+  },
+  {
+    id:"pa", name:"Pa", i:"P", c:"#4E6B8A", time:"Gister",
+    prev:"Het jy toe jou tires gepomp?!",
+    day:"Yesterday",
+    msgs:[{t:"Het jy toe jou tires gepomp?!"}]
+  },
+  {
+    id:"fiets", name:"Fietsry groep", i:"F", c:"#3F8A6E", time:"Gister",
+    prev:"Melt: Jy moet jou tires pomp Alex!",
+    day:"Yesterday",
+    msgs:[{t:"Jy moet jou tires pomp "+G+"!", who:"Melt"}]
+  },
+  {
+    id:"ma", name:"Ma ❤️", i:"M", c:"#B4713C", time:"Woensdag",
+    prev:"My goggatjie ❤️",
+    day:"Wednesday",
+    msgs:[{t:"My goggatjie ❤️"}]
+  },
+];
+
+/* ══════════════════════════════════════════════════════════════════
+   ④  DIE HOME SCREEN — icons and their jokes
+   ══════════════════════════════════════════════════════════════════ */
+// Calendar days, not elapsed hours — otherwise a morning visit on the day
+// before still rounds up and reads one too many.
+const midnight = d => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+const daysToGo = Math.max(0, Math.round((midnight(new Date(CONFIG.dateISO)) - midnight(new Date()))/864e5));
+const APPS = [
+  {n:"FaceTime", g:"facetime", bg:"linear-gradient(180deg,#5BE471,#1FA83C)", k:"Lui",      s:"Niemand bel jou nie. Hulle is almal in die groep."},
+  {n:"Calendar", g:"cal",      bg:"#FFFFFF",                                  k:CONFIG.calMonth, s:"Een event. Jy weet klaar watter een."},
+  {n:"Rides",    g:"maps",     bg:"linear-gradient(180deg,#2B2B31,#0C0C0E)",  k:"Gereël",  s:"Dis alles gereël."},
+  {n:"Camera",   g:"cam",      bg:"linear-gradient(180deg,#B9B9BE,#77777E)",  k:"Af",       s:"Kamera af. Wat daar gebeur, bly daar."},
+  {n:"Weather",  g:"weather",  bg:"linear-gradient(180deg,#3E9CF5,#1259C4)",  k:"Weer",     s:"Waar dit ook al is: "+CONFIG.weather+"."},
+  {n:"Clock",    g:"clock",    bg:"#0B0B0C",                                  k:"Aftel",    s:"Nog "+daysToGo+" dae. Die horlosie loop."},
+  {n:"Maps",     g:"maps",     bg:"linear-gradient(180deg,#8EDB7E,#3E9F53)",  k:"Roete",    s:"Bestemming geklassifiseer. Vra vir Beukes — hy gaan crack."},
+  {n:"Notes",    g:"notes",    bg:"linear-gradient(180deg,#FFE27A,#F2B63C)",  k:"1 nota",   s:"\"Dinge wat ons nooit weer noem nie\" — laas gewysig 03:41."},
+  {n:"Music",    g:"music",    bg:"linear-gradient(180deg,#FB5C74,#D9254A)",  k:"Playlist", s:"Jy gaan nie nou fokken Benson Boone luister nie"},
+  {n:"Wallet",   g:"wallet",   bg:"linear-gradient(180deg,#3A3A3F,#101013)",  k:"Beursie",  s:"Hokaai"},
+  {n:"Settings", g:"settings", bg:"linear-gradient(180deg,#A8A8AE,#6C6C74)",  k:"Gesluit",  s:"Instellings word bestuur deur jou best man."},
+  {n:"Braai",    g:"braai",    bg:"linear-gradient(180deg,#FF8A3C,#D93A16)",  k:"Kole",     s:"Thomas is busy"},
+];
+const DOCK = [
+  {n:"Phone",    g:"phone",    bg:"linear-gradient(180deg,#5BE471,#1FA83C)",  k:"Stemboodskap", s:"3 gemiste oproepe. Almal van Beukes. Almal 02:00."},
+  {n:"Safari",   g:"safari",   bg:"linear-gradient(180deg,#F4F5F7,#C9CDD6)",  k:"Geskiedenis",  s:"Soekgeskiedenis uitgevee. Jy's welkom."},
+  {n:"Photos",   g:"photos",   bg:"#FFFFFF",                                  k:"Album",        s:"Fotos van die komende naweek gaan eers na 'n komitee toe."},
+  {n:"Messages", g:"messages", bg:"linear-gradient(180deg,#5BE471,#1FA83C)",  app:"msgs"},
+];
+/* ══════════════════════════════════════════════════════════════════
+   ⑤  ENGINE — you shouldn't need to touch anything below here
+   ══════════════════════════════════════════════════════════════════ */
+const $ = s => document.querySelector(s);
+const el = (t,c,h) => { const n=document.createElement(t); if(c)n.className=c; if(h!=null)n.innerHTML=h; return n; };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const pace = ms => REDUCED ? Math.min(ms, 120) : ms;
+
+/* ---------- icon art ---------- */
+function glyph(g){
+  const S = (b,p,f) => `<svg viewBox="0 0 ${b} ${b}" aria-hidden="true">${p}</svg>`;
+  switch(g){
+    case "messages": return `<svg viewBox="0 0 60 60" aria-hidden="true"><path d="M30 13c-9.4 0-17 6.1-17 13.6 0 4.4 2.6 8.3 6.7 10.8-.5 2.1-1.8 4.6-3.7 6.4 3.7-.5 6.9-2 9.1-3.5 1.6.4 3.2.6 4.9.6 9.4 0 17-6.1 17-13.6S39.4 13 30 13z" fill="#fff"/></svg>`;
+    case "phone": return `<svg viewBox="0 0 60 60" aria-hidden="true"><path d="M22 14c1.6-1 3.4-.6 4.4.9l3.3 5c.9 1.4.6 3.2-.7 4.2l-2.4 1.8c-.6.5-.8 1.3-.5 2 1.5 3.6 4.4 6.5 8 8 .7.3 1.5.1 2-.5l1.8-2.4c1-1.3 2.8-1.6 4.2-.7l5 3.3c1.5 1 1.9 2.8.9 4.4l-2 3c-1.2 1.9-3.5 2.8-5.7 2.2C29.6 43 17 30.4 13.9 19.7c-.6-2.2.3-4.5 2.2-5.7l3-2z" fill="#fff"/></svg>`;
+    case "facetime": return `<svg viewBox="0 0 60 60" aria-hidden="true"><rect x="12" y="20" width="24" height="21" rx="5" fill="#fff"/><path d="M38 28.5 48 23v15l-10-5.5v-4z" fill="#fff"/></svg>`;
+    case "cal": return `<div class="glyph" style="flex-direction:column;line-height:1"><div style="font-size:10.5px;font-weight:500;color:#FF3B30;letter-spacing:.2px;margin-top:6px">${esc(CONFIG.calMonth.slice(0,3).toUpperCase())}</div><div style="font-size:30px;font-weight:300;color:#1A1A1C;margin-top:1px;letter-spacing:-1px">${esc(CONFIG.calDay)}</div></div>`;
+    case "photos": { let p=''; const cs=['#F8C62E','#F07C2B','#E5484D','#B14FD8','#4A7FF0','#3FB6E5','#46C06A','#A9D63F'];
+      for(let i=0;i<8;i++){ p+=`<ellipse cx="30" cy="19.5" rx="5.4" ry="10.5" fill="${cs[i]}" opacity=".82" transform="rotate(${i*45} 30 30)"/>`; }
+      return `<svg viewBox="0 0 60 60" aria-hidden="true" style="mix-blend-mode:multiply">${p}</svg>`; }
+    case "cam": return `<svg viewBox="0 0 60 60" aria-hidden="true"><rect x="10" y="18" width="40" height="26" rx="6" fill="#3A3A3F"/><circle cx="30" cy="31" r="9.5" fill="#1B1B1E"/><circle cx="30" cy="31" r="6.5" fill="#4B6E9E"/><circle cx="27.5" cy="28.5" r="2" fill="#A9C8ED" opacity=".8"/><rect x="38" y="22" width="6" height="3" rx="1.5" fill="#8E8E95"/></svg>`;
+    case "weather": return `<svg viewBox="0 0 60 60" aria-hidden="true"><circle cx="24" cy="24" r="8.5" fill="#FFD84D"/><path d="M38 44H21a7.5 7.5 0 0 1 0-15 9.5 9.5 0 0 1 18.3 2.2A6.4 6.4 0 0 1 38 44z" fill="#fff"/></svg>`;
+    case "clock": return `<svg viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="19" fill="#fff"/><circle cx="30" cy="30" r="19" fill="none" stroke="#E6E6E8" stroke-width="1"/><path d="M30 17v13l9 5.5" stroke="#111" stroke-width="2.4" stroke-linecap="round" fill="none"/><circle cx="30" cy="30" r="2" fill="#FF9500"/></svg>`;
+    case "maps": return `<svg viewBox="0 0 60 60" aria-hidden="true"><path d="M0 0h60v60H0z" fill="#8FDC84"/><path d="M0 36c14 0 14-14 28-14s18 12 32 12v26H0z" fill="#7CCBEF" opacity=".55"/><path d="M14 60c4-16 12-20 12-32S22 8 22 0" stroke="#fff" stroke-width="4" fill="none"/><path d="M60 26c-12 2-20 8-24 20" stroke="#FFD84D" stroke-width="3.5" fill="none"/><circle cx="38" cy="24" r="6" fill="#E5484D"/><circle cx="38" cy="24" r="2.2" fill="#fff"/></svg>`;
+    case "notes": return `<svg viewBox="0 0 60 60" aria-hidden="true"><rect x="0" y="0" width="60" height="13" fill="#FFF3C8"/><g stroke="#D9A93A" stroke-width="1.6" opacity=".55"><path d="M12 22h36M12 30h36M12 38h36M12 46h22"/></g></svg>`;
+    case "music": return `<svg viewBox="0 0 60 60" aria-hidden="true"><path d="M40 14 25 18v20.5a6 6 0 1 0 3.5 5.4V25l11-2.8v11.6a6 6 0 1 0 3.5 5.4V14h-3z" fill="#fff"/></svg>`;
+    case "wallet": return `<svg viewBox="0 0 60 60" aria-hidden="true"><rect x="11" y="16" width="38" height="9" rx="3" fill="#E5484D"/><rect x="11" y="24" width="38" height="9" rx="3" fill="#F8A33B"/><rect x="11" y="32" width="38" height="12" rx="3.5" fill="#F2F2F5"/></svg>`;
+    case "settings": return `<svg viewBox="0 0 60 60" aria-hidden="true"><g fill="#4A4A50"><circle cx="30" cy="30" r="15"/></g><circle cx="30" cy="30" r="9" fill="#D6D6DB"/><circle cx="30" cy="30" r="4.5" fill="#4A4A50"/><g stroke="#D6D6DB" stroke-width="3.4" stroke-linecap="round"><path d="M30 11v5M30 44v5M11 30h5M44 30h5M17 17l3.5 3.5M39.5 39.5 43 43M43 17l-3.5 3.5M20.5 39.5 17 43"/></g></svg>`;
+    case "braai": return `<svg viewBox="0 0 60 60" aria-hidden="true"><path d="M30 10c2 8-5 11-5 18a5 5 0 0 0 10 0c0-3-1-5-1-7 4 3 7 8 7 13a11 11 0 0 1-22 0c0-11 9-16 11-24z" fill="#FFE9B0"/><path d="M30 24c1 5-3 6-3 10a3.2 3.2 0 0 0 6.4 0c0-2-.7-3-.7-4 2.4 2 4.3 4.7 4.3 7.5a7 7 0 0 1-14 0c0-6.5 5-9.5 7-13.5z" fill="#FFF6DF"/></svg>`;
+    case "safari": return `<svg viewBox="0 0 60 60" aria-hidden="true"><circle cx="30" cy="30" r="21" fill="#0E8FE8"/><circle cx="30" cy="30" r="17.5" fill="#F7F8FA"/><path d="m41 19-16 6-6 16 16-6z" fill="#E5484D"/><path d="m30 30-11 11 16-6z" fill="#F2F2F5"/><circle cx="30" cy="30" r="1.8" fill="#9A9AA0"/></svg>`;
+    default: return "";
+  }
+}
+function iconEl(a){
+  const b = el("span","ic"); b.style.background = a.bg; b.innerHTML = glyph(a.g); return b;
+}
+
+/* ---------- sound (tiny, quiet, only after first tap) ---------- */
+let AC = null;
+const audio = () => { try{ AC = AC || new (window.AudioContext||window.webkitAudioContext)(); if(AC.state==="suspended")AC.resume(); return AC; }catch(e){ return null; } };
+function blip(freqs, dur=0.16, vol=0.05, type="sine"){
+  const c = audio(); if(!c) return;
+  freqs.forEach((f,i)=>{
+    const o=c.createOscillator(), g=c.createGain(), t=c.currentTime+i*0.075;
+    o.type=type; o.frequency.setValueAtTime(f,t);
+    g.gain.setValueAtTime(0,t); g.gain.linearRampToValueAtTime(vol,t+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+    o.connect(g); g.connect(c.destination); o.start(t); o.stop(t+dur+0.02);
+  });
+}
+const sfxIn   = () => blip([1046,1568],0.18,0.045);
+const sfxOut  = () => blip([784,1174],0.13,0.035);
+const sfxNote = () => blip([1318,1046,1568],0.2,0.055);
+const buzz = p => { try{ navigator.vibrate && navigator.vibrate(p); }catch(e){} };
+
+/* ---------- fit the phone to any screen ---------- */
+function fit(){
+  const w = innerWidth, h = innerHeight;
+  const bare = w < 460 || h < 620;
+  document.body.classList.toggle("bare", bare);
+  const pad = bare ? 0 : 22;
+  const vpad = bare ? 0 : 58;            // room for the hint line under the phone
+  const s = Math.min((w - pad) / 390, (h - vpad) / 844, bare ? 3 : 1);
+  document.getElementById("device").style.setProperty("--s", s);
+}
+addEventListener("resize", fit); fit();
+
+/* ---------- live clock ---------- */
+function tick(){
+  const d = new Date();
+  const hhmm = d.getHours().toString().padStart(2,"0")+":"+d.getMinutes().toString().padStart(2,"0");
+  $("#clock").textContent = hhmm;
+  $("#lockTime").textContent = hhmm;
+  $("#lockDate").textContent = d.toLocaleDateString("en-GB",{weekday:"long", day:"numeric", month:"long"});
+}
+tick(); setInterval(tick, 10000);
+
+/* ---------- home screen ---------- */
+const grid = $("#grid"), dock = $("#dock");
+function mountApps(){
+  APPS.forEach((a,i) => {
+    const b = el("button","app"); b.type="button"; b.style.animationDelay = (0.03*i+0.05)+"s";
+    b.appendChild(iconEl(a));
+    b.appendChild(el("span","lb", esc(a.n)));
+    b.addEventListener("click", e => tapApp(a, b, e));
+    if(a.n==="Messages") b.dataset.msg = "1";
+    grid.appendChild(b);
+  });
+  DOCK.forEach(a => {
+    const b = el("button","app"); b.type="button"; b.setAttribute("aria-label", a.n);
+    const ic = iconEl(a); b.appendChild(ic);
+    b.appendChild(el("span","lb", esc(a.n)));
+    if(a.app === "msgs"){ b.id = "msgApp"; }
+    b.addEventListener("click", e => tapApp(a, b, e));
+    dock.appendChild(b);
+  });
+}
+mountApps();
+
+let badgeEl = null;
+function setBadge(n){
+  const host = $("#msgApp").querySelector(".ic");
+  if(!badgeEl){ badgeEl = el("span","badge pop throb"); host.parentElement.style.position="relative"; $("#msgApp").appendChild(badgeEl); }
+  if(n<=0){ badgeEl.remove(); badgeEl=null; return; }
+  badgeEl.textContent = n;
+  badgeEl.setAttribute("aria-label", n+" unread messages");
+}
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(kicker, text){
+  const t = $("#toast");
+  t.innerHTML = `<span class="tk">${esc(kicker)}</span>${esc(text)}`;
+  t.classList.remove("out"); t.classList.add("in");
+  clearTimeout(toastT);
+  toastT = setTimeout(()=>{ t.classList.remove("in"); t.classList.add("out"); }, 2900);
+}
+
+function tapApp(a, node, e){
+  audio();
+  if(a.app === "msgs"){ openMessages(node); return; }
+  const ic = node.querySelector(".ic");
+  ic.classList.remove("nope"); void ic.offsetWidth; ic.classList.add("nope");
+  buzz(12); blip([440],0.08,0.028,"triangle");
+  toast(a.k || a.n, a.s || "Not today.");
+}
+
+/* ---------- view stack ---------- */
+const V = { home:$("#home"), msgs:$("#msgs"), thread:$("#thread") };
+function openView(v, originNode){
+  let ox = "50%", oy = "50%";
+  if(originNode){
+    const r = originNode.getBoundingClientRect(), s = $("#scr").getBoundingClientRect();
+    ox = ((r.left + r.width/2 - s.left) / s.width * 100) + "%";
+    oy = ((r.top + r.height/2 - s.top) / s.height * 100) + "%";
+  }
+  if(v._anim) v._anim.cancel();
+  v.style.transformOrigin = ox + " " + oy;
+  v.classList.add("on");
+  v._anim = v.animate([
+    {opacity:0, transform:"scale(.28)", borderRadius:"46px", offset:0},
+    {opacity:1, offset:.55},
+    {opacity:1, transform:"scale(1)", borderRadius:"0px", offset:1}
+  ], {duration: REDUCED ? 1 : 420, easing:"cubic-bezier(.2,.9,.25,1)", fill:"none"});
+}
+function closeView(v){
+  if(v._anim) v._anim.cancel();
+  const a = v.animate([
+    {opacity:1, transform:"scale(1)", borderRadius:"0px"},
+    {opacity:0, transform:"scale(.3)", borderRadius:"46px"}
+  ], {duration: REDUCED ? 1 : 300, easing:"cubic-bezier(.5,0,.8,.4)", fill:"forwards"});
+  v._anim = a;
+  a.onfinish = () => { v.classList.remove("on"); a.cancel(); v._anim = null; };
+}
+function slide(v, dir){ // dir: 1 = in from right, -1 = out to right
+  v.classList.add("on");
+  const from = dir===1 ? "translateX(100%)" : "translateX(0)";
+  const to   = dir===1 ? "translateX(0)"    : "translateX(100%)";
+  const anim = v.animate([{transform:from},{transform:to}],
+    {duration: REDUCED?1:340, easing:"cubic-bezier(.3,.9,.25,1)", fill:"none"});
+  if(dir===-1) anim.onfinish = ()=> v.classList.remove("on");
+}
+
+/* ---------- messages list ---------- */
+const list = $("#chatList");
+function makeAvatar(c, size){
+  if(c.group){
+    const a = el("span","av stack");
+    c.members.slice(0,3).forEach(m=>{
+      const s = el("span","", esc(m.i)); s.style.background = m.c; a.appendChild(s);
+    });
+    return a;
+  }
+  const a = el("span","av", esc(c.i));
+  a.style.background = c.c;
+  return a;
+}
+function renderList(){
+  list.innerHTML = "";
+  CHATS.forEach((c,i)=>{
+    const b = el("button", "chat-row"+(c.unread?" unread":"")); b.type="button";
+    b.style.animationDelay = (0.035*i)+"s";
+    b.appendChild(el("span","dot"));
+    b.appendChild(makeAvatar(c));
+    const m = el("span","cmeta");
+    m.appendChild(el("span","cname", esc(c.name)));
+    m.appendChild(el("span","cprev", esc(c.prev)));
+    b.appendChild(m);
+    const r = el("span","cright");
+    r.appendChild(el("span","ctime", esc(c.time)));
+    r.innerHTML += `<svg class="chev" viewBox="0 0 8 13" fill="none" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    b.appendChild(r);
+    b.addEventListener("click", ()=>openThread(c));
+    list.appendChild(b);
+  });
+}
+renderList();
+
+function totalUnread(){ return CHATS.reduce((n,c)=>n+(c.unread||0),0); }
+function refreshBackCount(){
+  const n = totalUnread();
+  $("#backCount").textContent = n;
+  $("#backCount").style.display = n ? "" : "none";
+}
+
+function openMessages(node){
+  if(notif.classList.contains("in")){ notif.classList.remove("in"); notif.classList.add("out"); }
+  $("#hint").classList.remove("show");
+  openView(V.msgs, node);
+  [...list.children].forEach((n,i)=>{ n.style.animation="none"; void n.offsetWidth; n.style.animation=""; n.style.animationDelay=(0.03*i)+"s"; });
+  refreshBackCount();
+}
+$("#msgsBack").addEventListener("click", ()=>{ closeView(V.msgs); });
+$("#threadBack").addEventListener("click", ()=>{
+  if(running) return;
+  slide(V.thread, -1);
+});
+
+/* ---------- thread rendering ---------- */
+const tbody = $("#tbody"), replybar = $("#replybar"), who = $("#threadWho");
+let running = false, lastSender = null, currentChat = null, groupDone = false;
+
+const bottom = () => { tbody.scrollTop = tbody.scrollHeight; };
+const isEmojiOnly = t => /^[\p{Extended_Pictographic}\u200d\ufe0f\s]+$/u.test(t) && t.trim().length <= 12;
+
+function addLine(o){
+  const line = el("div","line "+(o.me?"out":"in"));
+  if(!o.me){
+    const a = makeAvatar({i:o.person.i, c:o.person.c});
+    a.className = "sav" + ((o.sameRun || o.hideAv) ? " ghost" : "");
+    a.style.background = o.person.c; a.textContent = o.person.i;
+    line.appendChild(a);
+  }
+  const col = el("div","col");
+  if(!o.me && !o.sameRun && !o.hideAv && o.showName !== false) col.appendChild(el("div","sender", esc(o.person.name)));
+  if(o.gif){
+    col.appendChild(el("div","gifcard", `<span class="face">${esc(o.gif)}</span><span class="tag">GIF</span>`));
+    line.appendChild(col); tbody.appendChild(line); bottom(); return line;
+  }
+  const bub = el("div","bub"+(o.mono?" mono":"")+((o.big||isEmojiOnly(o.text))?" emoji-only":""));
+  if(o.big || isEmojiOnly(o.text)) bub.innerHTML = `<span class="em">${esc(o.text)}</span>`;
+  else if(o.mono) bub.innerHTML = esc(o.text).replace(/^([A-Z][A-Z À-ÿ]+)$/m, '<span class="k">$1</span>');
+  else bub.textContent = o.text;
+  if(o.tap) bub.appendChild(el("span","tap", o.tap));
+  col.appendChild(bub);
+  line.appendChild(col);
+  tbody.appendChild(line);
+  bottom();
+  return line;
+}
+function addTyping(person){
+  const line = el("div","line in");
+  const a = makeAvatar({i:person.i, c:person.c});
+  a.className="sav"; a.style.background=person.c; a.textContent=person.i;
+  line.appendChild(a);
+  const t = el("div","typing",'<i></i><i></i><i></i>');
+  t.setAttribute("aria-label", person.name+" is typing");
+  line.appendChild(t);
+  tbody.appendChild(line); bottom();
+  return line;
+}
+function daystamp(txt){
+  tbody.appendChild(el("div","daystamp",`<b>${esc(txt)}</b>`));
+}
+
+/* ---------- the invite payload ---------- */
+function rsvpRow(){
+  const start = new Date(CONFIG.dateISO);
+  const end = new Date(start.getTime() + 2*864e5);
+  const z = d => d.toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"");
+  const gcal = "https://calendar.google.com/calendar/render?action=TEMPLATE"
+    + "&text=" + encodeURIComponent("OPERASIE "+CONFIG.operation+" — "+CONFIG.groom+" se bachelors")
+    + "&dates=" + z(start) + "/" + z(end)
+    + "&location=" + encodeURIComponent(CONFIG.placeFull)
+    + "&details=" + encodeURIComponent("Vertrek "+CONFIG.depart+". Bring een skaam storie. Jou beursie bly by die huis.");
+  const c = el("div","invite");
+  c.innerHTML = `<div class="acts one">
+      <a href="${gcal}" target="_blank" rel="noopener">Voeg by kalender</a>
+    </div>`;
+  const line = el("div","line in");
+  line.appendChild(el("span","sav ghost"));
+  const col = el("div","col"); col.style.maxWidth="82%";
+  col.appendChild(c); line.appendChild(col);
+  tbody.appendChild(line); bottom();
+}
+
+/* ---------- reply chips ---------- */
+function showChips(node){
+  replybar.innerHTML = "";
+  replybar.appendChild(el("div","cue", esc(node.cue || "Reply")));
+  const wrap = el("div","chips");
+  node.choices.forEach(([label, target, primary], i)=>{
+    const b = el("button","chip"+(primary?" primary":""), esc(label));
+    b.type="button"; b.style.animationDelay = (0.07*i)+"s";
+    b.addEventListener("click", ()=>{
+      if(running) return;
+      running = true;
+      [...wrap.children].forEach(c=>{ if(c!==b) c.style.animation="chipOut .26s ease forwards"; });
+      b.classList.add("go");
+      sfxOut(); buzz(10);
+      setTimeout(()=>{
+        replybar.innerHTML = "";
+        addLine({me:true, text:label});
+        lastSender = "__me__";
+        setTimeout(()=>run(target), pace(450));
+      }, REDUCED?10:300);
+    });
+    wrap.appendChild(b);
+  });
+  replybar.appendChild(wrap);
+  requestAnimationFrame(bottom);
+}
+function idleBar(text){
+  replybar.innerHTML = "";
+  const f = el("div","fakeinput");
+  f.innerHTML = `<span class="box">${esc(text||"iMessage")}</span>
+    <span class="mic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3" fill="#8E8A93"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4" stroke="#8E8A93" stroke-width="2" stroke-linecap="round"/></svg></span>`;
+  replybar.appendChild(f);
+  requestAnimationFrame(bottom);
+}
+
+/* ---------- the runner ---------- */
+async function run(key){
+  const node = TREE[key];
+  if(!node){ running = false; return; }
+  running = true;
+  idleBar("…");
+  if(node.confetti) confetti();
+  for(const [whoKey, text, opt={}] of node.msgs){
+    const person = CAST[whoKey];
+    if(text === "__RSVP__"){ await sleep(pace(250)); rsvpRow(); await sleep(pace(opt.d||400)); lastSender = null; continue; }
+    const t = addTyping(person);
+    await sleep(pace(opt.t || 800));
+    t.remove();
+    addLine({person, text, sameRun: lastSender === whoKey, tap: opt.tap, big: opt.big, mono: opt.mono});
+    lastSender = whoKey;
+    sfxIn(); buzz(8);
+    await sleep(pace(opt.d || 400));
+  }
+  running = false;
+  if(node.choices) showChips(node);
+  else if(node.next) run(node.next);
+  else if(node.end){
+    const d = el("div","delivered","Delivered · Read");
+    tbody.appendChild(d); bottom();
+    idleBar("iMessage");
+    groupDone = true;
+    $("#hint").textContent = "Kyk ook na die ander chats";
+    $("#hint").classList.add("show");
+  }
+}
+
+/* ---------- opening a thread ----------
+   The group chat is a live, stateful conversation, so we can't just
+   re-render it when you wander off to read your mother's messages.
+   We detach its nodes into a fragment and put them back on return. */
+let stash = null;
+function stashGroup(){
+  if(!(currentChat && currentChat.live && tbody.dataset.started)) return;
+  tbody.querySelectorAll("*").forEach(n => { n.style.animation = "none"; });
+  const m = document.createDocumentFragment(), b = document.createDocumentFragment();
+  while(tbody.firstChild) m.appendChild(tbody.firstChild);
+  while(replybar.firstChild) b.appendChild(replybar.firstChild);
+  stash = {m, b};
+}
+function unstashGroup(){
+  if(!stash) return false;
+  tbody.innerHTML = ""; replybar.innerHTML = "";
+  tbody.appendChild(stash.m); replybar.appendChild(stash.b);
+  stash = null;
+  requestAnimationFrame(bottom);
+  return true;
+}
+
+function openThread(c){
+  if(running) return;
+  stashGroup();
+  currentChat = c;
+
+  who.innerHTML = "";
+  who.appendChild(makeAvatar(c));
+  who.appendChild(el("span","nm", esc(c.name.length > 16 ? c.name.slice(0,15)+"\u2026" : c.name)
+    + `<svg width="6" height="10" viewBox="0 0 8 13" fill="none" style="opacity:.4" aria-hidden="true"><path d="m1 1 5.5 5.5L1 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`));
+
+  if(c.unread){ c.unread = 0; renderList(); setBadge(totalUnread()); }
+  refreshBackCount();
+
+  if(c.live){
+    if(unstashGroup()){ slide(V.thread, 1); return; }
+    if(!tbody.dataset.started){
+      tbody.dataset.started = "1";
+      tbody.innerHTML = ""; lastSender = null;
+      daystamp("Today " + $("#clock").textContent);
+      idleBar("\u2026");
+      slide(V.thread, 1);
+      setTimeout(() => run("start"), pace(700));
+      return;
+    }
+    slide(V.thread, 1);
+    return;
+  }
+
+  // a static thread — the easter eggs
+  tbody.innerHTML = ""; lastSender = null;
+  daystamp(c.day || "Earlier");
+  let prev = null;
+  c.msgs.forEach(m => {
+    const person = m.who ? {name:m.who, i:m.who[0], c:"#6E6A75"} : {name:c.name, i:c.i, c:c.c};
+    const key = m.me ? "__me__" : person.name;
+    addLine({
+      me: m.me, person, text: m.t, tap: m.tap, gif: m.gif,
+      sameRun: prev === key,
+      showName: !!m.who,
+      hideAv: !m.who
+    });
+    prev = key;
+  });
+  idleBar("iMessage");
+  slide(V.thread, 1);
+}
+
+/* ---------- confetti ---------- */
+function confetti(){
+  if(REDUCED) return;
+  const cv = $("#confetti"), r = $("#scr").getBoundingClientRect();
+  cv.width = 390; cv.height = 844;
+  cv.style.width = "390px"; cv.style.height = "844px";
+  const ctx = cv.getContext("2d");
+  const cols = ["#FF6B2C","#FFC46B","#0A84FF","#F6F4F1","#E0553C","#2F8F5B"];
+  const P = [];
+  for(let i=0;i<110;i++){
+    P.push({
+      x: 195 + (Math.random()-.5)*180, y: 500 + Math.random()*60,
+      vx: (Math.random()-.5)*7.5, vy: -9 - Math.random()*8.5,
+      w: 5 + Math.random()*6, h: 7 + Math.random()*8,
+      a: Math.random()*Math.PI, va: (Math.random()-.5)*.28,
+      c: cols[(Math.random()*cols.length)|0], life: 1
+    });
+  }
+  let t0 = performance.now();
+  (function frame(now){
+    const dt = Math.min(32, now - t0) / 16.67; t0 = now;
+    ctx.clearRect(0,0,390,844);
+    let alive = false;
+    P.forEach(p=>{
+      p.vy += 0.42*dt; p.vx *= 0.995; p.x += p.vx*dt; p.y += p.vy*dt; p.a += p.va*dt;
+      if(p.y > 900) p.life = 0; else alive = true;
+      if(!p.life) return;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.a);
+      ctx.fillStyle = p.c; ctx.globalAlpha = Math.max(0, Math.min(1,(880-p.y)/220));
+      ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+    });
+    if(alive) requestAnimationFrame(frame); else ctx.clearRect(0,0,390,844);
+  })(t0);
+}
+
+/* ---------- the lock screen ----------
+   Nothing else in the page runs until this opens: the notification
+   timer starts on unlock, not on load. */
+const PIN = String(CONFIG.passcode);
+let pinBuf = "", tries = 0, unlocked = false;
+const dotsEl = $("#dots"), hintEl = $("#pinHint"), keysEl = $("#keys");
+
+document.body.classList.add("locked");
+dotsEl.innerHTML = Array.from(PIN, () => "<i></i>").join("");
+
+const KEYPAD = [["1",""],["2","ABC"],["3","DEF"],["4","GHI"],["5","JKL"],["6","MNO"],
+                ["7","PQRS"],["8","TUV"],["9","WXYZ"],null,["0",""],"del"];
+KEYPAD.forEach(k => {
+  if(k === null){ keysEl.appendChild(el("span","key ghost")); return; }
+  const b = el("button", k === "del" ? "key del" : "key"); b.type = "button";
+  if(k === "del"){
+    b.textContent = "Delete"; b.setAttribute("aria-label","Delete");
+    b.addEventListener("click", pinDel);
+  } else {
+    b.innerHTML = `<b>${k[0]}</b>` + (k[1] ? `<em>${k[1]}</em>` : "");
+    b.setAttribute("aria-label", k[0]);
+    b.addEventListener("click", () => pinPush(k[0]));
+  }
+  keysEl.appendChild(b);
+});
+
+function renderDots(){
+  [...dotsEl.children].forEach((d,i) => d.classList.toggle("on", i < pinBuf.length));
+}
+function pinPush(d){
+  if(unlocked || pinBuf.length >= PIN.length) return;
+  audio(); blip([620],0.045,0.022,"triangle"); buzz(6);
+  pinBuf += d; renderDots();
+  if(pinBuf.length === PIN.length) setTimeout(checkPin, 170);
+}
+function pinDel(){
+  if(unlocked || !pinBuf) return;
+  blip([420],0.04,0.018,"triangle");
+  pinBuf = pinBuf.slice(0,-1); renderDots();
+}
+function checkPin(){
+  if(pinBuf === PIN){ unlock(); return; }
+  tries++;
+  dotsEl.classList.add("wrong");
+  blip([300,210],0.18,0.032); buzz([22,50,22]);
+  setTimeout(() => { dotsEl.classList.remove("wrong"); pinBuf = ""; renderDots(); }, 500);
+  if(tries >= 3){
+    hintEl.innerHTML = "<b>Passcode hint</b>" + esc(CONFIG.passcodeHint);
+    hintEl.classList.add("show");
+  }
+}
+function unlock(){
+  unlocked = true;
+  blip([880,1320,1760],0.2,0.042); buzz(20);
+  document.body.classList.remove("locked");
+  const lock = $("#lock");
+  lock.classList.add("open");
+  setTimeout(() => lock.classList.remove("on","open"), 660);
+  // replay the home-screen entrance so the reveal lands
+  [...grid.children, dock].forEach(n => { n.style.animation = "none"; void n.offsetWidth; n.style.animation = ""; });
+  setTimeout(showNotif, 5000);
+}
+addEventListener("keydown", e => {
+  if(unlocked) return;
+  if(/^[0-9]$/.test(e.key)){ pinPush(e.key); e.preventDefault(); }
+  else if(e.key === "Backspace"){ pinDel(); e.preventDefault(); }
+});
+
+/* ---------- boot: the notification, 5 seconds after unlock ---------- */
+const notif = $("#notif");
+$("#notifIcon").style.background = "linear-gradient(180deg,#5BE471,#1FA83C)";
+$("#notifIcon").innerHTML = `<svg viewBox="0 0 60 60" width="40" height="40" aria-hidden="true"><path d="M30 13c-9.4 0-17 6.1-17 13.6 0 4.4 2.6 8.3 6.7 10.8-.5 2.1-1.8 4.6-3.7 6.4 3.7-.5 6.9-2 9.1-3.5 1.6.4 3.2.6 4.9.6 9.4 0 17-6.1 17-13.6S39.4 13 30 13z" fill="#fff"/></svg>`;
+$("#notifTitle").textContent = CONFIG.group;
+$("#notifBody").innerHTML = `<b>${esc(CONFIG.bestMan)}:</b> Manne manne manne luister gou.`;
+notif.setAttribute("aria-label", "Notification from "+CONFIG.group+". Open.");
+
+let notifShown = false;
+function showNotif(){
+  if(notifShown) return; notifShown = true;
+  notif.classList.remove("out"); notif.classList.add("in");
+  setBadge(totalUnread());
+  sfxNote(); buzz([14,60,14]);
+  $("#hint").textContent = "Tik die kennisgewing";
+  $("#hint").classList.add("show");
+}
+notif.addEventListener("click", ()=>{
+  audio();
+  notif.classList.remove("in"); notif.classList.add("out");
+  $("#hint").classList.remove("show");
+  openView(V.msgs, notif);
+  setTimeout(()=>openThread(CHATS[0]), 320);
+});
+// first interaction anywhere unlocks audio
+addEventListener("pointerdown", ()=>audio(), {once:true});
+// keep the phone fitted after fonts land
+document.fonts && document.fonts.ready.then(fit);
+</script>
+</body>
+</html>

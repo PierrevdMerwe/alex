@@ -40,7 +40,7 @@
 }
 
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-html,body{height:100%}
+html,body{height:100%;height:100dvh}
 body{
   margin:0;
   background:var(--ink);
@@ -52,8 +52,13 @@ body{
 
 /* ---------- the room the phone sits in ---------- */
 .room{
-  position:fixed;inset:0;
-  display:grid;place-items:center;
+  position:fixed;top:0;left:0;right:0;
+  height:100dvh;                 /* modern browsers: excludes browser chrome */
+  height:var(--vvh,100dvh);      /* JS-measured visual viewport, most exact */
+  box-sizing:border-box;
+  padding:env(safe-area-inset-top,0px) env(safe-area-inset-right,0px)
+          env(safe-area-inset-bottom,0px) env(safe-area-inset-left,0px);
+  display:grid;justify-items:center;align-content:center;row-gap:13px;
   background:
     radial-gradient(120% 80% at 50% 112%, rgba(255,107,44,.30) 0%, rgba(255,107,44,0) 58%),
     radial-gradient(90% 60% at 50% -6%, rgba(58,30,60,.85) 0%, rgba(58,30,60,0) 60%),
@@ -65,16 +70,17 @@ body{
   opacity:.045;mix-blend-mode:overlay;
 }
 .hint{
-  position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+  margin:0;
   font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;
   color:var(--dim-2);opacity:0;transition:opacity .6s ease;pointer-events:none;white-space:nowrap;
 }
 .hint.show{opacity:1}
 
 /* ---------- device ---------- */
+.stage{position:relative;flex:none}
 .device{
-  position:relative;width:390px;height:844px;flex:none;
-  transform:scale(var(--s,1));transform-origin:center center;
+  position:absolute;top:0;left:0;width:390px;height:844px;
+  transform:scale(var(--s,1));transform-origin:top left;
   border-radius:56px;
   padding:11px;
   background:linear-gradient(145deg,#5B5560 0%,#232128 22%,#3E3A45 50%,#1A181E 78%,#4A4550 100%);
@@ -589,9 +595,7 @@ body.locked #clock{opacity:0}
 #confetti{position:absolute;inset:0;z-index:80;pointer-events:none}
 
 /* ---------- responsive ---------- */
-@media (max-width:440px){
-  .hint{display:none}
-}
+body.bare .hint{display:none}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
   .bub,.chip,.chat-row,.app,.invite{opacity:1!important;transform:none!important}
@@ -599,8 +603,8 @@ body.locked #clock{opacity:0}
 </style>
 </head>
 <body>
-<div class="room">
-  <div class="device" id="device">
+<div class="room" id="room">
+  <div class="stage" id="stage"><div class="device" id="device">
     <div class="screen" id="scr">
 
       <!-- ============ HOME ============ -->
@@ -697,7 +701,7 @@ body.locked #clock{opacity:0}
       <div class="bar"></div>
 
     </div>
-  </div>
+  </div></div>
   <p class="hint" id="hint">Tik die kennisgewing</p>
 </div>
 
@@ -1077,16 +1081,36 @@ const sfxNote = () => blip([1318,1046,1568],0.2,0.055);
 const buzz = p => { try{ navigator.vibrate && navigator.vibrate(p); }catch(e){} };
 
 /* ---------- fit the phone to any screen ---------- */
+const room = document.getElementById("room"),
+      stage = document.getElementById("stage"),
+      device = document.getElementById("device");
 function fit(){
-  const w = innerWidth, h = innerHeight;
+  // The visual viewport is the part you can actually see — on a phone that
+  // excludes the browser's address bar, which innerHeight happily includes.
+  const vv = window.visualViewport;
+  document.documentElement.style.setProperty("--vvh", (vv ? vv.height : innerHeight) + "px");
+
+  const cs = getComputedStyle(room);
+  const w = room.clientWidth  - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const h = room.clientHeight - parseFloat(cs.paddingTop)  - parseFloat(cs.paddingBottom);
+
   const bare = w < 460 || h < 620;
   document.body.classList.toggle("bare", bare);
-  const pad = bare ? 0 : 22;
-  const vpad = bare ? 0 : 58;            // room for the hint line under the phone
-  const s = Math.min((w - pad) / 390, (h - vpad) / 844, bare ? 3 : 1);
-  document.getElementById("device").style.setProperty("--s", s);
+  const padX = bare ? 4  : 22;
+  const padY = bare ? 10 : 58;           // on desktop, room for the hint line
+  const s = Math.min((w - padX) / 390, (h - padY) / 844, bare ? 3 : 1);
+  device.style.setProperty("--s", s);
+  // the stage reserves exactly the scaled footprint, so centring is honest
+  stage.style.width  = (390 * s) + "px";
+  stage.style.height = (844 * s) + "px";
 }
-addEventListener("resize", fit); fit();
+addEventListener("resize", fit);
+addEventListener("orientationchange", () => setTimeout(fit, 120));
+if(window.visualViewport){
+  visualViewport.addEventListener("resize", fit);
+  visualViewport.addEventListener("scroll", fit);
+}
+fit();
 
 /* ---------- live clock ---------- */
 function tick(){
